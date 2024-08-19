@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -152,7 +152,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+vim.opt.scrolloff = 11
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -189,6 +189,11 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- comment with <leader> 3 in normal mode taken from nvchad config
+vim.keymap.set('n', '<leader>3', function()
+  require('Comment.api').toggle.linewise.current()
+end)
+vim.keymap.set('v', '<leader>3', "<ESC><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>")
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -240,6 +245,39 @@ require('lazy').setup({
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
 
+  {
+    'nvim-java/nvim-java',
+    dependencies = {
+      'nvim-java/lua-async-await',
+      'nvim-java/nvim-java-refactor',
+      'nvim-java/nvim-java-core',
+      'nvim-java/nvim-java-test',
+      'nvim-java/nvim-java-dap',
+      'MunifTanjim/nui.nvim',
+      'neovim/nvim-lspconfig',
+      'mfussenegger/nvim-dap',
+      {
+        'williamboman/mason.nvim',
+        opts = {
+          registries = {
+            'github:nvim-java/mason-registry',
+            'github:mason-org/mason-registry',
+          },
+        },
+      },
+      {
+        'williamboman/mason-lspconfig.nvim',
+        opts = {
+          handlers = {
+            ['jdtls'] = function()
+              require('java').setup()
+            end,
+          },
+        },
+      },
+    },
+  },
+  { 'ThePrimeagen/harpoon', opts = {}, branch = 'harpoon2', dependencies = { 'nvim-lua/plenary.nvim' } },
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
   --    require('gitsigns').setup({ ... })
@@ -577,6 +615,18 @@ require('lazy').setup({
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
         --
+        -- https://github.com/golang/tools/blob/master/gopls/doc/vim.md
+        gopls = {
+          settings = {
+            gopls = {
+              analyses = {
+                unusedparams = true,
+              },
+              staticcheck = true,
+              gofumpt = true,
+            },
+          },
+        },
 
         lua_ls = {
           -- cmd = {...},
@@ -589,6 +639,46 @@ require('lazy').setup({
               },
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
               -- diagnostics = { disable = { 'missing-fields' } },
+            },
+          },
+        },
+        jdtls = {
+          jdk = {
+            auto_install = false,
+          },
+          settings = {
+            java = {
+              configuration = {
+                runtimes = {
+                  {
+                    name = '22-open',
+                    path = '/home/ovi/.sdkman/candidates/java/22-open',
+                    default = true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        pylsp = {
+          settings = {
+            pylsp = {
+              plugins = {
+                black = { enabled = true },
+                autopep8 = { enabled = true },
+                yapf = { enabled = false },
+                -- linter options
+                pylint = { enabled = false, executable = 'pylint' },
+                pyflakes = { enabled = false },
+                pycodestyle = { enabled = true, maxLineLength = 120 },
+                flake8 = { enabled = true, maxLineLength = 120, ignore = { 'E203', 'W503' } },
+                -- type checker
+                pylsp_mypy = { enabled = true },
+                -- auto-completion options
+                jedi_completion = { fuzzy = true },
+                -- import sorting
+                pyls_isort = { enabled = true },
+              },
             },
           },
         },
@@ -778,13 +868,14 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+    --
+    'bluz71/vim-moonfly-colors',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'moonfly'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
@@ -907,6 +998,57 @@ require('lazy').setup({
     },
   },
 })
+
+local harpoon = require 'harpoon'
+-- harpoon repmaps
+-- REQUIRED
+harpoon:setup()
+-- REQUIRED
+
+vim.keymap.set('n', '<leader>a', function()
+  harpoon:list():append()
+end)
+vim.keymap.set('n', '<leader>e', function()
+  harpoon.ui:toggle_quick_menu(harpoon:list())
+end)
+
+vim.keymap.set('n', '<C-h>', function()
+  harpoon:list():select(1)
+end)
+vim.keymap.set('n', '<C-j>', function()
+  harpoon:list():select(2)
+end)
+vim.keymap.set('n', '<C-k>', function()
+  harpoon:list():select(3)
+end)
+vim.keymap.set('n', '<C-l>', function()
+  harpoon:list():select(4)
+end)
+
+-- harpoon w/ telescope
+-- basic telescope configuration
+local conf = require('telescope.config').values
+local function toggle_telescope(harpoon_files)
+  local file_paths = {}
+  for _, item in ipairs(harpoon_files.items) do
+    table.insert(file_paths, item.value)
+  end
+
+  require('telescope.pickers')
+    .new({}, {
+      prompt_title = 'Harpoon',
+      finder = require('telescope.finders').new_table {
+        results = file_paths,
+      },
+      previewer = conf.file_previewer {},
+      sorter = conf.generic_sorter {},
+    })
+    :find()
+end
+
+vim.keymap.set('n', '<C-e>', function()
+  toggle_telescope(harpoon:list())
+end, { desc = 'Open harpoon window' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
