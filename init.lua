@@ -245,38 +245,6 @@ require('lazy').setup({
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
 
-  {
-    'nvim-java/nvim-java',
-    dependencies = {
-      'nvim-java/lua-async-await',
-      'nvim-java/nvim-java-refactor',
-      'nvim-java/nvim-java-core',
-      'nvim-java/nvim-java-test',
-      'nvim-java/nvim-java-dap',
-      'MunifTanjim/nui.nvim',
-      'neovim/nvim-lspconfig',
-      'mfussenegger/nvim-dap',
-      {
-        'williamboman/mason.nvim',
-        opts = {
-          registries = {
-            'github:nvim-java/mason-registry',
-            'github:mason-org/mason-registry',
-          },
-        },
-      },
-      {
-        'williamboman/mason-lspconfig.nvim',
-        opts = {
-          handlers = {
-            ['jdtls'] = function()
-              require('java').setup()
-            end,
-          },
-        },
-      },
-    },
-  },
   { 'ThePrimeagen/harpoon', opts = {}, branch = 'harpoon2', dependencies = { 'nvim-lua/plenary.nvim' } },
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
@@ -642,46 +610,46 @@ require('lazy').setup({
             },
           },
         },
-        jdtls = {
-          jdk = {
-            auto_install = false,
-          },
-          settings = {
-            java = {
-              configuration = {
-                runtimes = {
-                  {
-                    name = '22-open',
-                    path = '/home/ovi/.sdkman/candidates/java/22-open',
-                    default = true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        pylsp = {
-          settings = {
-            pylsp = {
-              plugins = {
-                black = { enabled = true },
-                autopep8 = { enabled = true },
-                yapf = { enabled = false },
-                -- linter options
-                pylint = { enabled = false, executable = 'pylint' },
-                pyflakes = { enabled = false },
-                pycodestyle = { enabled = true, maxLineLength = 120 },
-                flake8 = { enabled = true, maxLineLength = 120, ignore = { 'E203', 'W503' } },
-                -- type checker
-                pylsp_mypy = { enabled = true },
-                -- auto-completion options
-                jedi_completion = { fuzzy = true },
-                -- import sorting
-                pyls_isort = { enabled = true },
-              },
-            },
-          },
-        },
+        -- jdtls = {
+        --   jdk = {
+        --     auto_install = false,
+        --   },
+        --   settings = {
+        --     java = {
+        --       configuration = {
+        --         runtimes = {
+        --           {
+        --             name = '22-open',
+        --             path = '/home/ovi/.sdkman/candidates/java/22-open',
+        --             default = true,
+        --           },
+        --         },
+        --       },
+        --     },
+        --   },
+        -- },
+        -- pylsp = {
+        --   settings = {
+        --     pylsp = {
+        --       plugins = {
+        --         black = { enabled = true },
+        --         autopep8 = { enabled = true },
+        --         yapf = { enabled = false },
+        --         -- linter options
+        --         pylint = { enabled = false, executable = 'pylint' },
+        --         pyflakes = { enabled = false },
+        --         pycodestyle = { enabled = true, maxLineLength = 120 },
+        --         flake8 = { enabled = true, maxLineLength = 120, ignore = { 'E203', 'W503' } },
+        --         -- type checker
+        --         pylsp_mypy = { enabled = true },
+        --         -- auto-completion options
+        --         jedi_completion = { fuzzy = true },
+        --         -- import sorting
+        --         pyls_isort = { enabled = true },
+        --       },
+        --     },
+        --   },
+        -- },
       }
 
       -- Ensure the servers and tools above are installed
@@ -701,6 +669,8 @@ require('lazy').setup({
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       require('mason-lspconfig').setup {
+        ensure_installed = {},
+        automatic_installation = false,
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
@@ -884,6 +854,24 @@ require('lazy').setup({
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+
+  {
+    'kristijanhusak/vim-dadbod-ui',
+    dependencies = {
+      { 'tpope/vim-dadbod', lazy = true },
+      { 'kristijanhusak/vim-dadbod-completion', ft = { 'sql', 'mysql', 'plsql' }, lazy = true }, -- Optional
+    },
+    cmd = {
+      'DBUI',
+      'DBUIToggle',
+      'DBUIAddConnection',
+      'DBUIFindBuffer',
+    },
+    init = function()
+      -- Your DBUI configuration
+      vim.g.db_ui_use_nerd_fonts = 1
+    end,
+  },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
